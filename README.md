@@ -24,8 +24,8 @@ pip install pandas
 pip install tabulate
 ```
 ### System
-[Microsoft Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-[Tesseract](https://github.com/tesseract-ocr/tesseract/wiki)
-[imagemagik](https://imagemagick.org/script/download.php)
+- Microsoft Visual C++ Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+- Tesseract: https://github.com/tesseract-ocr/tesseract/wiki
+- imagemagik: https://imagemagick.org/script/download.php
 
 If you are using windows, you should set PATH for imagemagik and tesseract.
