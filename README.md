@@ -4,7 +4,7 @@ This project aims to automate the receipt/invoice parsing process.
 
 ## Installation and Prerequisite
 
-### Python
+### Python Modules
 ```python
 # to add rating for text extraction process
 pip install python-Levenshtein
@@ -23,7 +23,7 @@ pip install pdfminer.six
 pip install pandas
 pip install tabulate
 ```
-### System
+### Environments
 - Microsoft Visual C++ Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 - Tesseract: https://github.com/tesseract-ocr/tesseract/wiki
 - imagemagik: https://imagemagick.org/script/download.php
