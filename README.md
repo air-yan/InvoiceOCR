@@ -29,3 +29,14 @@ pip install tabulate
 - imagemagik: https://imagemagick.org/script/download.php
 
 If you are using windows, you should set PATH for imagemagik and tesseract.
+
+## TODO
+
+- Reconstruct the codes into py files
+- Add testing codes
+- Add License
+- Functions to add:
+  - invoice #
+  - bill date vs due date
+  - address
+  - vendor name
