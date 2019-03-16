@@ -14,7 +14,7 @@ pip install Wand
 pip install opencv-python
 
 # ocr engine
-pip install tesseract-ocr
+pip install pytesseract
 
 # PDF text extraction tool
 pip install pdfminer.six
