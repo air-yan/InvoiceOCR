@@ -35,8 +35,8 @@ If you are using windows, you should set PATH for imagemagik and tesseract.
 - Reconstruct the codes into py files √
 - Make the codes clean √
 - Add testing codes
-  - add txt log output
-  - add pandas Excel output
+  - add txt log output √
+  - add pandas Excel output √
   - read the correct result
 - Add License √
 - Functions to add:
