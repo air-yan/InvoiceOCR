@@ -32,7 +32,7 @@ If you are using windows, you should set PATH for imagemagik and tesseract.
 
 ## TODO
 
-- Reconstruct the codes into py files
+- Reconstruct the codes into py files √
 - Make the codes clean √
 - Add testing codes
   - add txt log output
