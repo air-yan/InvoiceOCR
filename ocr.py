@@ -13,7 +13,7 @@ import pytesseract
 import cv2
 
 
-def ocr_process(filename, resolution=450):
+def ocr_process(filename, resolution=450, page_seg_method='3'):
     """ Convert a PDF into images,
         preprocess them using opencv,
         and then feed them into Tesseract ocr engine.
@@ -61,9 +61,16 @@ def ocr_process(filename, resolution=450):
             cv2.imwrite(path_filename2, im_gray)
 
             txt = "".join([txt, pytesseract.image_to_string(
-                P_image.open(path_filename2), lang="eng")])
+                P_image.open(path_filename2), lang="eng",
+                config='--psm ' + page_seg_method)])
 
     return txt
 
+
 # for testing purpose - print out ocr result
-# print(ocr_process('test_image/03-19 AvePoint Inc. Inv 106203.pdf'))
+txt = ocr_process(
+    'test_image/03-19 AvePoint Inc. Inv 106203.pdf', page_seg_method='6')
+
+with open("test6.txt", 'w') as file:
+    data = file.write(txt)
+    file.close()

@@ -69,6 +69,7 @@ dir_test_img = directory + 'test_image/'
 
 # reference for pdfminer looping. This matters a lot!
 argu = [(5, 0.5, 5), (100, 1, 5), (5, 1.5, 1.5)]
+argu2 = ['1', '3', '6']
 
 # main loop
 for filename in os.listdir(dir_test_img):
@@ -103,14 +104,18 @@ for filename in os.listdir(dir_test_img):
 
         # **************************************ocr process starts
         print('\nStarting ocr process...')
-        txt = ocr.ocr_process(dir_file)
-        tem_df = regex_extraction(txt)
+        counter = 1
+        for i in argu2:
+            print('Performing option {} for ocr'.format(counter))
+            txt = ocr.ocr_process(dir_file, page_seg_method=i)
+            tem_df = regex_extraction(txt)
 
-        if (tem_df is not None) and (len(tem_df) != 0):
-            tem_df.loc[:, "Process"] = "OCR process"
+            if (tem_df is not None) and (len(tem_df) != 0):
+                tem_df.loc[:, "Process"] = "OCR process {}".format(counter)
 
-        # Append all DataFrames from the above processes together
-        df = df.append(tem_df)
+            # Append all DataFrames from the above processes together
+            df = df.append(tem_df)
+            counter += 1
 
         # print initial rating
         df = df.loc[:, ['Process', 'Criteria', 'string', 'amount', 'rating']]
