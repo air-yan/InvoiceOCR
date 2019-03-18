@@ -45,5 +45,5 @@ If you are using windows, you should set PATH for imagemagik and tesseract.
   - bill date vs due date
   - address
   - vendor name
-- Add three OCR loops for diff parameters
+- Add three OCR loops for diff parameters √
 - Optimize your rating process
