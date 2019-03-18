@@ -62,24 +62,28 @@ def agg_dfs(df):
 
 # --------------Main Loop-------------- #
 startTime = datetime.now()
+f = open('log.md','wb')
 
 # set your working directory
-directory = 'D:/git/Invoice-Receipt-OCR/'
+directory = 'g:/git/Invoice-Receipt-OCR/'
 dir_test_img = directory + 'test_image/'
 
 # reference for pdfminer looping. This matters a lot!
 argu = [(5, 0.5, 5), (100, 1, 5), (5, 1.5, 1.5)]
 argu2 = ['1', '3', '6']
 
+# csv
+csv = pd.DataFrame()
+
 # main loop
 for filename in os.listdir(dir_test_img):
     dir_file = "".join([dir_test_img, filename])
-    print('Analysing pdf {}...'.format(filename))
+    f.write('Analysing pdf {}...\n'.format(filename).encode('utf8'))
 
     # If it's a pdf file, then...
     if filename.endswith(".pdf"):
         # **************************************pdfminer process starts
-        print('\nStarting PDFminer process...')
+        f.write('\nStarting PDFminer process...\n'.encode('utf8'))
 
         counter = 1
         df = pd.DataFrame()
@@ -87,7 +91,7 @@ for filename in os.listdir(dir_test_img):
         # Perform PDF Miner process:
         # Looping three times with different settings
         for i, j, k in argu:
-            print('Performing option {} for pdfminer'.format(counter))
+            f.write('Performing option {} for pdfminer\n'.format(counter).encode('utf8'))
             txt = pdf.convert_pdf(
                 dir_file, char_margin=i, line_margin=j, boxes_flow=k)
             tem_df = regex_extraction(txt)
@@ -103,10 +107,10 @@ for filename in os.listdir(dir_test_img):
         # **************************************pdfminer process ends
 
         # **************************************ocr process starts
-        print('\nStarting ocr process...')
+        f.write('\nStarting ocr process...\n'.encode('utf8'))
         counter = 1
         for i in argu2:
-            print('Performing option {} for ocr'.format(counter))
+            f.write('Performing option {} for ocr\n'.format(counter).encode('utf8'))
             txt = ocr.ocr_process(dir_file, page_seg_method=i)
             tem_df = regex_extraction(txt)
 
@@ -119,27 +123,32 @@ for filename in os.listdir(dir_test_img):
 
         # print initial rating
         df = df.loc[:, ['Process', 'Criteria', 'string', 'amount', 'rating']]
-        print('\nThe initial rating is:')
-        print(tabulate(df.sort_values(by='rating'), tablefmt='psql',
-                       headers=('Process', 'Criteria', 'string', 'amount', 'rating')))
+        f.write('\nThe initial rating is:\n'.encode('utf8'))
+        f.write(tabulate(df.sort_values(by='rating'), tablefmt='psql',
+                       headers=('Process', 'Criteria', 'string', 'amount', 'rating')).encode('utf8'))
 
         # aggregate ratings based on amount
         # do some ajustment on ratings
         # print final aggregated rating
         agg_df = agg_dfs(df)
 
-        print('\nThe final aggregated rating is:')
-        print(tabulate(agg_df, tablefmt='psql', showindex=False,
-                       headers=('amount', 'frequency', 'final rating')))
+        f.write('\nThe final aggregated rating is:\n'.encode('utf8'))
+        f.write(tabulate(agg_df, tablefmt='psql', showindex=False,
+                       headers=('amount', 'frequency', 'final rating')).encode('utf8'))
         # **************************************ocr process ends
+        
+        agg_df.loc[:,"File Name"] = filename
+        csv = csv.append(agg_df.iloc[0,:])
 
     else:  # if it's not a pdf file
         #         txt = ocr_process('test_image/' + filname) # We use a OCR process
         #         regex_extraction(txt)
         pass
 
-    print("-"*20 + "\n")
+    f.write(("-"*20 + "\n\n").encode('utf8'))
 
+f.close()
+csv.loc[:,['File Name','amount']].to_csv("csv_result.csv",index=False)
 
 print(datetime.now() - startTime)
 # --------------Main Loop-------------- #
