@@ -32,12 +32,18 @@ If you are using windows, you should set PATH for imagemagik and tesseract.
 
 ## TODO
 
-- Reconstruct the codes into py files
-- Make the codes clean
+- Reconstruct the codes into py files √
+- Make the codes clean √
 - Add testing codes
-- Add License
+  - add txt log output
+  - add pandas Excel output
+  - read the correct result
+- Add License √
 - Functions to add:
+  - amount √
   - invoice #
   - bill date vs due date
   - address
   - vendor name
+- Add three OCR loops for diff parameters
+- Optimize your rating process
