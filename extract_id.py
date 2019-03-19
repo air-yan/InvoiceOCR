@@ -16,7 +16,7 @@ def invoice_no_checker(regex_findall, distance_str):
     '''
     counter = 0
 
-    df = pd.DataFrame(columns=['string', 'invoice#', 'rating'])
+    df = pd.DataFrame(columns=['string', 'result', 'rating'])
 
     for ind, item in enumerate(regex_findall):
         if ('tax' in item.lower()) or ('last' in item.lower()):
@@ -28,7 +28,7 @@ def invoice_no_checker(regex_findall, distance_str):
 
                 rating = distance(distance_str, item.lower())
 
-                # invoice = invoice.group(0).replace('-', '')
+                invoice = invoice.group(0)
 
                 # record it in the dataframe
                 df.loc[counter] = [item, invoice, rating]
@@ -36,13 +36,6 @@ def invoice_no_checker(regex_findall, distance_str):
 
                 counter += 1
 
-# testing code below:
-#     if len(regex_findall) > 0:
-#         print(tabulate(df.sort_values(by='rating',ascending=True),headers=('string','invoice','rating'),tablefmt='psql'))
-#                 print('The string is: {}'.format(item))
-#                 print('The invoice is: {}'.format(invoice))
-#                 print('The rating is: {}'.format(rating))
-#                 print('-'*20)
     return df
 
 
@@ -52,7 +45,7 @@ def leven_invoice_no(txt):
     
     '''
     id_str_ls = re.findall(
-        'Invoice Number.*\s*\d.*\d', txt, re.IGNORECASE)
+        'invoice number[^a-zA-Z]{1,20}\d', txt, re.IGNORECASE)
     id_df = invoice_no_checker(id_str_ls, "Invoice Number %d".lower())
 
     # balance_str_ls = re.findall(

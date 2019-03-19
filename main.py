@@ -45,12 +45,13 @@ def ocr_rating_down(x):
 def agg_dfs(df):
     '''This aggregate dfs for different processes together'''
     if len(df) > 1:
-        df.loc[:, ['amount', 'rating']].astype(float)
+        df.loc[:, 'rating'].astype(float)
+        # df.loc[:, ['result', 'rating']].astype(float)
         agg_df = df.copy()
         agg_df['rating'] = df.apply(balance_rating_up, axis=1)
         agg_df['rating'] = df.apply(ocr_rating_down, axis=1)
 
-        agg_df = (df.groupby('amount')
+        agg_df = (df.groupby('result')
                   .aggregate({'string': len, 'rating': np.mean})
                   .sort_values(by='rating', ascending=True)
                   .reset_index())
@@ -127,10 +128,10 @@ def main_loop(pdf_process=True, ocr_process=True):
                     counter += 1
                 # **************************************ocr process ends
             # print initial rating
-            df = df.loc[:, ['Process', 'Criteria', 'string', 'amount', 'rating']]
+            df = df.loc[:, ['Process', 'Criteria', 'string', 'result', 'rating']]
             f.write('\nThe initial rating is:\n'.encode('utf8'))
             f.write(tabulate(df.sort_values(by='rating'), tablefmt='psql',
-                            headers=('Process', 'Criteria', 'string', 'amount', 'rating')).encode('utf8'))
+                            headers=('Process', 'Criteria', 'string', 'result', 'rating')).encode('utf8'))
 
             # aggregate ratings based on amount
             # do some ajustment on ratings
@@ -139,7 +140,7 @@ def main_loop(pdf_process=True, ocr_process=True):
 
             f.write('\nThe final aggregated rating is:\n'.encode('utf8'))
             f.write(tabulate(agg_df, tablefmt='psql', showindex=False,
-                            headers=('amount', 'frequency', 'final rating')).encode('utf8'))
+                            headers=('result', 'frequency', 'final rating')).encode('utf8'))
                 
 
             if len(agg_df) != 0:
@@ -153,7 +154,7 @@ def main_loop(pdf_process=True, ocr_process=True):
 
         f.write(("-"*20 + "\n\n").encode('utf8'))
     f.close()
-    csv.loc[:, ['File Name', 'amount']].to_csv("csv_result.csv", index=False)
+    csv.loc[:, ['File Name', 'result']].to_csv("csv_result.csv", index=False)
 
     print(datetime.now() - startTime)
     # --------------Main Loop-------------- #
