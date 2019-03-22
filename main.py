@@ -72,7 +72,7 @@ directory = 'd:/git/Invoice-Receipt-OCR/'
 dir_test_img = directory + 'test_image/'
 
 # reference for pdfminer looping. This matters a lot!
-argu = [(5, 0.5, 5), (100, 1, 5), (5, 1.5, 1.5)]
+argu = [(2, 0.5, 0.5),(5, 0.5, 0.5),(5, 0.5, 5), (100, 1, 5), (5, 1.5, 1.5)]
 argu2 = ['1', '3', '6']
 
 # main loop

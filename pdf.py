@@ -28,3 +28,6 @@ def convert_pdf(path, line_overlap=0.5, char_margin=5, line_margin=0.5, boxes_fl
     device.close()
     retstr.close()
     return text
+
+print(convert_pdf('test_image/INV02997565_35722_03012019.pdf',
+    line_overlap=0.5, char_margin=2, line_margin=0.5, boxes_flow=0.5))

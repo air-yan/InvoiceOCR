@@ -19,7 +19,7 @@ def invoice_no_checker(regex_findall, distance_str):
     df = pd.DataFrame(columns=['string', 'result', 'rating'])
 
     for ind, item in enumerate(regex_findall):
-        if ('tax' in item.lower()) or ('last' in item.lower()):
+        if ('date' in item.lower()) or ('usd' in item.lower()) or ('total' in item.lower() or ('amount' in item.lower()):
             del regex_findall[ind]
         else:
             invoice = re.search('\d.*\d', item)
@@ -45,7 +45,7 @@ def leven_invoice_no(txt):
     
     '''
     id_str_ls = re.findall(
-        'invoice number[^a-zA-Z]{1,20}\d', txt, re.IGNORECASE)
+        'invoice[^0-9]{1,15}[^a-zA-Z]{1,20}\d', txt, re.IGNORECASE)
     id_df = invoice_no_checker(id_str_ls, "Invoice Number %d".lower())
 
     # balance_str_ls = re.findall(
