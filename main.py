@@ -7,23 +7,25 @@ from datetime import datetime
 import os
 import numpy as np
 import pandas as pd
-from tabulate import tabulate
 import warnings
 warnings.filterwarnings("ignore")
 
 
-def regex_extraction(txt):
+def regex_extraction(txt, process):
     '''
     This controls what functions will be run.
     You can use this to test each function independently.
     '''
-    # return extract_amount.leven_amount(txt)
-    return extract_id.leven_invoice_no(txt)
-#     reg_amount(txt)
-#     regex_date(txt)
-#     regex_vendor_address(txt)
-#     regex_remittance(txt)
+    id_df = extract_id.leven_invoice_no(txt)
+    amount_df = extract_amount.leven_amount(txt)
 
+    ls = [amount_df, id_df]
+
+    for df in ls:
+        if (df is not None) and (len(df) != 0):
+            df.loc[:, "Process"] = process
+
+    return id_df, amount_df
 # ---------------rate adjustment-------------- #
 
 
@@ -42,26 +44,41 @@ def ocr_rating_down(x):
 # ---------------rate adjustment-------------- #
 
 
-def agg_dfs(df):
+def agg_dfs(df, result, filename):
     '''This aggregate dfs for different processes together'''
     if len(df) > 1:
         df.loc[:, 'rating'].astype(float)
-        # df.loc[:, ['result', 'rating']].astype(float)
         agg_df = df.copy()
         agg_df['rating'] = df.apply(balance_rating_up, axis=1)
         agg_df['rating'] = df.apply(ocr_rating_down, axis=1)
 
-        agg_df = (df.groupby('result')
+        agg_df = (df.groupby(result)
                   .aggregate({'string': len, 'rating': np.mean})
                   .sort_values(by='rating', ascending=True)
                   .reset_index())
         agg_df.loc[:, 'string'].astype(float)
         agg_df['final rating'] = agg_df['rating'] - (agg_df['string'] - 1)
         agg_df.drop('rating', axis=1, inplace=True)
-        return agg_df
-    else:
-        return df
 
+        if len(agg_df) != 0:
+                agg_df.loc[:, "File Name"] = filename
+                agg_df = (agg_df.head(1)
+                            .drop(['string','final rating'],axis=1)
+                            .set_index('File Name'))
+
+        return agg_df
+
+    elif len(df) == 1:
+        agg_df = df.copy()
+        agg_df.loc[:, "File Name"] = filename
+        agg_df = (agg_df.head(1)
+                            .drop(['string','rating'],axis=1)
+                            .set_index('File Name'))
+        return agg_df
+
+    else:
+        return None     
+        
 
 # --------------Main Loop-------------- #
 startTime = datetime.now()
@@ -72,8 +89,9 @@ directory = 'd:/git/Invoice-Receipt-OCR/'
 dir_test_img = directory + 'test_image/'
 
 # reference for pdfminer looping. This matters a lot!
-argu = [(2, 0.5, 0.5),(5, 0.5, 0.5),(5, 0.5, 5), (100, 1, 5), (5, 1.5, 1.5)]
+argu = [(2, 0.5, 0.5), (5, 0.5, 0.5), (5, 0.5, 5), (100, 1, 5), (5, 1.5, 1.5)]
 argu2 = ['1', '3', '6']
+
 
 # main loop
 def main_loop(pdf_process=True, ocr_process=True):
@@ -86,75 +104,55 @@ def main_loop(pdf_process=True, ocr_process=True):
         if filename.endswith(".pdf"):
             if pdf_process:
                 # **************************************pdfminer process starts
-                f.write('\nStarting PDFminer process...\n'.encode('utf8'))
-
                 counter = 1
-                df = pd.DataFrame()
+                id_df = pd.DataFrame()
+                amount_df = pd.DataFrame()
 
                 # Perform PDF Miner process:
                 # Looping three times with different settings
                 for i, j, k in argu:
-                    f.write('Performing option {} for pdfminer\n'.format(
-                        counter).encode('utf8'))
-                    txt = pdf.convert_pdf(
-                        dir_file, char_margin=i, line_margin=j, boxes_flow=k)
-                    tem_df = regex_extraction(txt)
 
-                    # Add a column to tem_df to show it's from PDFminer process
-                    if (tem_df is not None) and (len(tem_df) != 0):
-                        tem_df.loc[:, "Process"] = "PDF Miner option {}".format(
-                            counter)
+                    txt = pdf.convert_pdf(dir_file, char_margin=i, line_margin=j, boxes_flow=k)
+                    id_tem, amount_tem = regex_extraction(txt, "PDF Miner option {}".format(counter))
 
                     # Append all DataFrames together
-                    df = df.append(tem_df)
+                    id_df = id_df.append(id_tem)
+                    amount_df = amount_df.append(amount_tem)
+
                     counter += 1
                 # **************************************pdfminer process ends
 
             if ocr_process:
                 # **************************************ocr process starts
-                f.write('\nStarting ocr process...\n'.encode('utf8'))
                 counter = 1
                 for i in argu2:
-                    f.write('Performing option {} for ocr\n'.format(
-                        counter).encode('utf8'))
-                    txt = ocr.ocr_process(dir_file, page_seg_method=i)
-                    tem_df = regex_extraction(txt)
 
-                    if (tem_df is not None) and (len(tem_df) != 0):
-                        tem_df.loc[:, "Process"] = "OCR process {}".format(counter)
+                    txt = ocr.ocr_process(dir_file, page_seg_method=i)
+                    id_tem, amount_tem = regex_extraction(txt, "OCR process {}".format(counter))
 
                     # Append all DataFrames from the above processes together
-                    df = df.append(tem_df)
+                    id_df = id_df.append(id_tem)
+                    amount_df = amount_df.append(amount_tem)
+
                     counter += 1
                 # **************************************ocr process ends
-            # print initial rating
-            df = df.loc[:, ['Process', 'Criteria', 'string', 'result', 'rating']]
-            f.write('\nThe initial rating is:\n'.encode('utf8'))
-            f.write(tabulate(df.sort_values(by='rating'), tablefmt='psql',
-                            headers=('Process', 'Criteria', 'string', 'result', 'rating')).encode('utf8'))
 
             # aggregate ratings based on amount
             # do some ajustment on ratings
             # print final aggregated rating
-            agg_df = agg_dfs(df)
+            id_agg = agg_dfs(id_df, 'ID', filename)
+            amount_agg = agg_dfs(amount_df, 'Amount', filename)
 
-            f.write('\nThe final aggregated rating is:\n'.encode('utf8'))
-            f.write(tabulate(agg_df, tablefmt='psql', showindex=False,
-                            headers=('result', 'frequency', 'final rating')).encode('utf8'))
-                
+            if id_agg is not None or amount_agg is not None:
+                agg_df = pd.concat([id_agg, amount_agg], axis=1)
+                agg_df = agg_df.loc[:,['Amount','ID']]
+                csv = csv.append(agg_df)          
 
-            if len(agg_df) != 0:
-                agg_df.loc[:, "File Name"] = filename
-                csv = csv.append(agg_df.iloc[0, :])
-
-        else:  # if it's not a pdf file, we do nothing... currently
-            #         txt = ocr_process('test_image/' + filname)
-            #         regex_extraction(txt)
+        else:
+                # if it's not a pdf file, we do nothing... currently
             pass
 
-        f.write(("-"*20 + "\n\n").encode('utf8'))
-    f.close()
-    csv.loc[:, ['File Name', 'result']].to_csv("csv_result.csv", index=False)
+    csv.to_csv("csv_result.csv")
 
     print(datetime.now() - startTime)
     # --------------Main Loop-------------- #

@@ -16,7 +16,7 @@ def amount_checker(regex_findall, distance_str):
     '''
     counter = 0
 
-    df = pd.DataFrame(columns=['string', 'amount', 'rating'])
+    df = pd.DataFrame(columns=['string', 'Amount', 'rating'])
 
     for ind, item in enumerate(regex_findall):
         if ('tax' in item.lower()) or ('last' in item.lower()):
@@ -32,11 +32,11 @@ def amount_checker(regex_findall, distance_str):
 
                 # record it in the dataframe
                 df.loc[counter] = [item, amount, rating]
-                df[['amount', 'rating']] = df.loc[:, [
-                    'amount', 'rating']].astype(float)
+                df[['Amount', 'rating']] = df.loc[:, [
+                    'Amount', 'rating']].astype(float)
 
                 # if the amount is 0, we drop it. It's false.
-                df = df[df['amount'] != 0]
+                df = df[df['Amount'] != 0]
                 counter += 1
 
 # testing code below:
