@@ -1,0 +1,8 @@
+/converted_image
+/preprocessed_image
+/reference
+/test_image
+.vs
+.ipynb_checkpoints
+.vscode
+/__pycache__
