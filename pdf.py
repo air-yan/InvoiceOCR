@@ -6,6 +6,9 @@ from io import StringIO
 
 
 def convert_pdf(path, line_overlap=0.5, char_margin=5, line_margin=0.5, boxes_flow=0.5):
+    '''Using the pdfminder module, convert PDF to strings and return the value.
+    Different parameters can return significantly different results.
+    '''
     rsrcmgr = PDFResourceManager()
     retstr = StringIO()
     codec = 'utf-8'
