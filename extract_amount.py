@@ -9,20 +9,43 @@ from Levenshtein import distance
 
 dic = {'regex_name': [],
        'amount': [],
-       'score': []}
+       'score': [],
+       'string': []}
 
 
-def amount_parsser(invoice_string, regex_expression, scoring_string, dic=dic):
+def scoring(regex_expression, item):
+    '''
+    用来打分的
+    '''
+    # 把连续的数字字符串统一都替换为%d
+    item_revised = re.sub('[0-9]{1,15}.{1,15}[0-9]{2}', '%d', item).lower()
+
+    # 将total，amount，balnance，due等常出现的词汇去掉
+    item_revised = (item_revised.replace('total', '')
+                    .replace('amount', '')
+                    .replace('balance', '')
+                    .replace('due', '')
+                    .replace('$', '')
+                    .replace('USD', '')
+                    .strip())
+
+    # 如果结果为 %d 的话，那么分数是100。多一个字符评分降一点
+    score = 100 - distance('%d', item_revised)
+    return score
+
+
+def amount_parsser(invoice_string, regex_expression, dic=dic):
     '''
     给定一个regex表达式，提取出金额数，同时给该结果打分。
     结果在dictionary中保存
     '''
 
-    target_found = re.findall(regex_expression[1], invoice_string, re.IGNORECASE)
+    target_found = re.findall(
+        regex_expression['regex'], invoice_string, re.IGNORECASE)
 
     if len(target_found) == 0:
-        print('Nothing matched')
-        return None
+        # print('Nothing matched')
+        return dic
 
     else:
 
@@ -38,14 +61,15 @@ def amount_parsser(invoice_string, regex_expression, scoring_string, dic=dic):
 
                 if target_amount is not None:
 
-                    score = distance(scoring_string, item.lower())
+                    score = scoring(regex_expression, item.lower())
 
                     amount = target_amount.group(
                         0).replace(',', '')  # 如果有千分号，替换一下。
 
-                    dic['regex_name'].append(regex_expression[0])
+                    dic['regex_name'].append(regex_expression['name'])
                     dic['amount'].append(amount)
                     dic['score'].append(score)
+                    dic['string'].append(item)
 
         return dic
 

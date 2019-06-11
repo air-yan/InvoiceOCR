@@ -72,11 +72,3 @@ def ocr_process(filename, resolution=450, page_seg_method='3'):
                 config='--psm ' + page_seg_method)])
     return txt
 
-
-# for testing purpose only - print out ocr result
-# txt = ocr_process(
-#     'test_image/03-19 AvePoint Inc. Inv 106203.pdf', page_seg_method='6')
-
-# with open("test6.txt", 'w') as file:
-#     data = file.write(txt)
-#     file.close()

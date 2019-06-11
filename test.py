@@ -1,39 +1,41 @@
-import pdf
-import ocr
-import extract_amount
+import copy
+import pandas as pd
+from ocr import ocr_process
+from extract_amount import amount_parsser, dic
 
-test_regex = ['Total Amount',
-              '(?<!Tax )(?<!Sub)(?<!Sub )(Total[^0-9]{1,30}[0-9,]*\.\d\d)']
+# 路径与ocr
+file_path = r'US invoice/invoice_FS40177.pdf'
+ocr_result = ocr_process(file_path) # 这一步会花较长时间
 
-test_regex2 = [
-    'Balance', '(?<!Previous )(?<!Prior )(?<!Ending )(?<!Past Due )(Balance[^0-9]{1,30}[0-9,]*\.\d\d)']
+# 准备regex
+totalAmountRegex = {'name': 'Total Amount',
+                     'regex': '(?<!Tax )(?<!Sub)(?<!Sub )(Total[^0-9]{1,30}[0-9,]*\.\d\d)'}
+balanceAmountRegex = {'name': 'Balance',
+                       'regex': '(?<!Previous )(?<!Prior )(?<!Ending )(?<!Past Due )(Balance[^0-9]{1,30}[0-9,]*\.\d\d)'}
+dueAmountRegex = {'name': 'Amount Due',
+                   'regex': '(Amount Due[^0-9]{1,30}[0-9,]*\.\d\d)'}
 
-test_regex3 = ['Amount Due', '(Amount Due[^0-9]{1,30}[0-9,]*\.\d\d)']
+# 用deepcopy防止pass by reference
+result_dic = amount_parsser(ocr_result, totalAmountRegex, dic)
+result_dic1 = amount_parsser(ocr_result, balanceAmountRegex, copy.deepcopy(result_dic))
+result_dic2 = amount_parsser(ocr_result, dueAmountRegex, copy.deepcopy(result_dic1))
 
-file = r'US invoice/731_1722485_usd_20190228_invoice_553369247008.pdf'
+# print 每一步的结果
+print('-'*10 + 'Show each steps' + '-'*10)
+print(result_dic)
+print(result_dic1)
+print(result_dic2)
+print('-'*10 + 'Show each steps' + '-'*10 + '\n')
 
-# ---------------pdf minder-------------- #
-# argu = [(2, 0.5, 0.5), (5, 0.5, 0.5), (5, 0.5, 5), (100, 1, 5), (5, 1.5, 1.5)]
-
-# counter = 1
-# for i, j, k in argu:
-#     txt = pdf.convert_pdf(file,
-#         char_margin=i, line_margin=j, boxes_flow=k)
-
-#     result = extract_amount.regex_parsser(
-#         txt, test_regex, 'Total Amount', extract_amount.dic)
-    # print(counter)
-    # print(result)
-    # print('\n')
-# ---------------pdf minder-------------- #
-
-
-
-txt = ocr.ocr_process(file)
-
-result = extract_amount.amount_parsser(
-        txt, test_regex, 'Total Amount', extract_amount.dic)
-
-print(result)
+# print 所有结果
+print('-'*10 + 'Show All Results' + '-'*10)
+print(pd.DataFrame(result_dic2))
+print('-'*10 + 'Show All Results' + '-'*10 + '\n')
 
 
+# 选第一个得分最高的
+best_index = result_dic2['score'].index(max(result_dic2['score']))
+best_df = pd.DataFrame(result_dic2).iloc[best_index,:]
+print('-'*10 + 'Best result' + '-'*10)
+print(best_df)
+print('-'*10 + 'Best result' + '-'*10 + '\n')
